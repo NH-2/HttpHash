@@ -9,35 +9,34 @@ import (
 	"net/url"
 )
 
-func hashResponse(rawUrl string) (string, error) {
+func hashResponse(rawUrl string) (string, string, error) {
 	schemeUrl := addScheme(rawUrl)
 
 	err := validateURL(schemeUrl)
 	if err != nil {
-		return "", fmt.Errorf("failed to parse url: %v", err)
+		return "", "", fmt.Errorf("failed to parse url: %v", err)
 	}
 
 	responseBody, err := getResponseBody(schemeUrl)
 	if err != nil {
-		return "", fmt.Errorf("error: %v", err)
+		return "", "", fmt.Errorf("error: %v", err)
 	}
 	binaryHash := md5.Sum(responseBody)
 	hexHash := hex.EncodeToString(binaryHash[:])
-	return hexHash, nil
+	return hexHash, schemeUrl, nil
 }
 
 // adds scheme (`http://`) to the raw URL if missing
 func addScheme(rawUrl string) string {
 	if rawUrl[0:len("http://")] != "http://" {
-		// add scheme to url
 		rawUrl = fmt.Sprintf("http://%s", rawUrl)
 	}
 	return rawUrl
 }
 
 // checks that the URL has a valid format.
-func validateURL(rawUrl string) error {
-	_, err := url.ParseRequestURI(rawUrl)
+func validateURL(schemeUrl string) error {
+	_, err := url.ParseRequestURI(schemeUrl)
 	if err != nil {
 		// if URL is invalid, it would not be parsed
 		return err
