@@ -42,8 +42,8 @@ func main() {
 	}
 
 	// parse flags and arguments
-	urls := flag.Args()
 	flag.Parse()
+	urls := flag.Args()
 	// check args are non nil
 	if len(urls) == 0 {
 		flag.Usage()
