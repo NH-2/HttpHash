@@ -26,15 +26,27 @@ func worker(id uint, urls <-chan string, done chan<- bool) {
 	done <- true
 }
 
-func main() {
-	// parse flags and arguments
-	flag.Parse()
-	urls := flag.Args()
+const (
+	usage = `usage: %s -parallel <maxParallelRequests> [URL(s)]...
+Makes parallel http requests and prints the address of the request along with the MD5 hash of the response.
 
+example:
+%s -parallel 3 example.com google.com reddit.com/r/funny
+`
+)
+
+func main() {
+	flag.Usage = func() {
+		fmt.Fprintf(flag.CommandLine.Output(), usage, os.Args[0], os.Args[0])
+		flag.PrintDefaults()
+	}
+
+	// parse flags and arguments
+	urls := flag.Args()
+	flag.Parse()
 	// check args are non nil
 	if len(urls) == 0 {
-		err := fmt.Errorf("no URLs provided. Please input at least one URL to run the program")
-		fmt.Printf("error: %v\n", err)
+		flag.Usage()
 		os.Exit(STATUS_CODE_ERROR_NO_ARGS)
 	}
 
