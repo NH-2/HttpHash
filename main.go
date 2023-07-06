@@ -7,6 +7,7 @@ import (
 )
 
 const STATUS_CODE_ERROR_NO_ARGS = 1
+const STATUS_CODE_ERROR_INVALID_FLAG_VALUE = 2
 
 var maxParallelRequests = flag.Uint("parallel", 10, "max requests to send in parallel. positive number.")
 
@@ -29,6 +30,7 @@ func worker(id uint, urls <-chan string, done chan<- bool) {
 const (
 	usage = `usage: %s -parallel <maxParallelRequests> [URL(s)]...
 Makes parallel http requests and prints the address of the request along with the MD5 hash of the response.
+-parallel must be greater than 1
 
 example:
 %s -parallel 3 example.com google.com reddit.com/r/funny
@@ -48,6 +50,11 @@ func main() {
 	if len(urls) == 0 {
 		flag.Usage()
 		os.Exit(STATUS_CODE_ERROR_NO_ARGS)
+	}
+	// check maxParallelRequests is not 0
+	if *maxParallelRequests == uint(0) {
+		flag.Usage()
+		os.Exit(STATUS_CODE_ERROR_INVALID_FLAG_VALUE)
 	}
 
 	jobs := make(chan string, *maxParallelRequests)
